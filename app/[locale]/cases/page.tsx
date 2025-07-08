@@ -29,7 +29,9 @@ export default function CasesPage() {
         c.first_name.toLowerCase().includes(searchLower) ||
         c.last_name.toLowerCase().includes(searchLower) ||
         c.email?.toLowerCase().includes(searchLower) ||
-        c.phone.includes(searchLower)
+        c.phone?.toLowerCase().includes(searchLower) ||
+        c.home_phone?.toLowerCase().includes(searchLower) ||
+        c.cell_phone?.toLowerCase().includes(searchLower)
       )
     }
 
@@ -90,9 +92,35 @@ export default function CasesPage() {
     router.push(`/${locale}/cases/${caseId}`)
   }
 
-  const handleExport = () => {
-    // TODO: Implement CSV export
-    console.log('Exporting cases:', filteredCases)
+  const handleExport = async () => {
+    try {
+      // Call the export API
+      const response = await fetch('/api/export', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to export data')
+      }
+
+      // Get the CSV content
+      const csvContent = await response.text()
+      
+      // Create a blob and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `appointments-export-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Error exporting CSV:', error)
+      alert('Failed to export CSV file')
+    }
   }
 
   const handleLogout = async () => {
@@ -166,7 +194,7 @@ export default function CasesPage() {
                 API Keys
               </Button>
               <Button variant="outline" onClick={handleExport}>
-                Export CSV
+                Export Appointments
               </Button>
               <Button>
                 New Case
@@ -229,6 +257,7 @@ export default function CasesPage() {
                   <th className="table-header">Contact</th>
                   <th className="table-header">Channel</th>
                   <th className="table-header">Status</th>
+                  <th className="table-header">Disposition</th>
                   <th className="table-header">Created</th>
                   <th className="table-header">Follow Up</th>
                 </tr>
@@ -254,10 +283,26 @@ export default function CasesPage() {
                       </div>
                     </td>
                     <td className="table-cell">
-                      <div>
-                        <div className="text-text-primary">{caseItem.phone}</div>
+                      <div className="space-y-1">
+                        {caseItem.cell_phone && (
+                          <div className="text-text-primary">
+                            📱 {caseItem.cell_phone}
+                          </div>
+                        )}
+                        {caseItem.home_phone && (
+                          <div className="text-sm text-text-secondary">
+                            🏠 {caseItem.home_phone}
+                          </div>
+                        )}
+                        {!caseItem.cell_phone && !caseItem.home_phone && caseItem.phone && (
+                          <div className="text-text-primary">
+                            📞 {caseItem.phone}
+                          </div>
+                        )}
                         {caseItem.email && (
-                          <div className="text-sm text-text-secondary">{caseItem.email}</div>
+                          <div className="text-sm text-text-secondary">
+                            ✉️ {caseItem.email}
+                          </div>
                         )}
                       </div>
                     </td>
@@ -270,6 +315,15 @@ export default function CasesPage() {
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(caseItem.status)}`}>
                         {caseItem.status}
                       </span>
+                    </td>
+                    <td className="table-cell">
+                      {caseItem.disposition ? (
+                        <span className="text-sm text-text-primary bg-gray-100 px-2 py-1 rounded">
+                          {caseItem.disposition}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-text-secondary">-</span>
+                      )}
                     </td>
                     <td className="table-cell text-sm text-text-secondary">
                       {formatDate(caseItem.created_at)}

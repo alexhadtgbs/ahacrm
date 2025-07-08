@@ -1,4 +1,4 @@
-import type { Case } from '@/types'
+import type { Case, Note } from '@/types'
 
 // API base URL
 const API_BASE = '/api'
@@ -102,4 +102,58 @@ export async function updateCaseFollowUpDate(id: number, followUpDate: string | 
 // Assign case to user
 export async function assignCase(id: number, assignedTo: string): Promise<Case> {
   return patchCase(id, { assigned_to: assignedTo })
+}
+
+// Notes API functions
+export async function fetchNotes(caseId: number): Promise<Note[]> {
+  const response = await fetch(`/api/notes?case_id=${caseId}`, {
+    credentials: 'include'
+  })
+  if (!response.ok) {
+    throw new Error('Failed to fetch notes')
+  }
+  return response.json()
+}
+
+export async function createNote(caseId: number, content: string): Promise<Note> {
+  const response = await fetch('/api/notes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ case_id: caseId, content }),
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to create note')
+  }
+  return response.json()
+}
+
+export async function updateNote(id: number, content: string): Promise<Note> {
+  const response = await fetch('/api/notes', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ id, content }),
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to update note')
+  }
+  return response.json()
+}
+
+export async function deleteNote(id: number): Promise<void> {
+  const response = await fetch(`/api/notes?id=${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to delete note')
+  }
 } 

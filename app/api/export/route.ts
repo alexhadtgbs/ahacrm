@@ -1,49 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
-import type { CaseFilters } from '@/types'
+import { withApiKeyAuth } from '@/lib/api-auth'
 
-export async function POST(request: NextRequest) {
+export const GET = withApiKeyAuth(async (request: NextRequest) => {
   try {
-    const body = await request.json()
-    const filters: CaseFilters = body.filters || {}
-
-    // Build the query based on filters
     const cookieStore = await cookies()
     const supabase = createClient(cookieStore)
-    let query = supabase
+
+    // Fetch only cases with status APPUNTAMENTO
+    const { data: cases, error } = await supabase
       .from('cases')
-      .select(`
-        *,
-        profiles!cases_assigned_to_fkey(full_name)
-      `)
-
-    // Apply filters
-    if (filters.search) {
-      query = query.or(`first_name.ilike.%${filters.search}%,last_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`)
-    }
-
-    if (filters.status) {
-      query = query.eq('status', filters.status as any)
-    }
-
-    if (filters.channel) {
-      query = query.eq('channel', filters.channel as any)
-    }
-
-    if (filters.assigned_to) {
-      query = query.eq('assigned_to', filters.assigned_to as any)
-    }
-
-    if (filters.date_from) {
-      query = query.gte('created_at', filters.date_from)
-    }
-
-    if (filters.date_to) {
-      query = query.lte('created_at', filters.date_to)
-    }
-
-    const { data: cases, error } = await query
+      .select('*')
+      .eq('status', 'APPUNTAMENTO' as any)
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching cases for export:', error)
@@ -53,48 +23,50 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Convert to CSV format
+    // Get the first note for each case
+    const casesWithNotes = await Promise.all(
+      (cases || []).map(async (caseItem: any) => {
+        const { data: notes } = await supabase
+          .from('notes')
+          .select('content')
+          .eq('case_id', caseItem.id as any)
+          .order('created_at', { ascending: true })
+          .limit(1)
+
+        return {
+          ...caseItem,
+          firstNote: notes && notes.length > 0 ? (notes[0] as any).content : ''
+        }
+      })
+    )
+
+    // CSV headers as specified
     const csvHeaders = [
-      'ID',
-      'First Name',
-      'Last Name',
-      'Phone',
-      'Email',
-      'Channel',
-      'Origin',
-      'Status',
-      'Outcome',
-      'Clinic',
-      'Treatment',
-      'Promotion',
-      'Created At',
-      'Follow Up Date',
-      'Assigned To',
-      'Dialer Campaign Tag'
+      'CustID',
+      'First',
+      'Last',
+      'Home Phone',
+      'Cell Phone',
+      'Notas',
+      'Canal',
+      'Preview'
     ]
 
-    const csvRows = (cases as any[] | undefined)?.map(caseItem => [
-      caseItem.id,
-      caseItem.first_name,
-      caseItem.last_name,
-      caseItem.phone,
-      caseItem.email || '',
-      caseItem.channel,
-      caseItem.origin,
-      caseItem.status,
-      caseItem.outcome || '',
-      caseItem.clinic,
-      caseItem.treatment || '',
-      caseItem.promotion || '',
-      caseItem.created_at,
-      caseItem.follow_up_date || '',
-      caseItem.profiles?.full_name || '',
-      caseItem.dialer_campaign_tag || ''
-    ]) || []
+    // Convert to CSV format with specified mapping
+    const csvRows = casesWithNotes.map((caseItem: any) => [
+      caseItem.id,                                    // CustID
+      caseItem.first_name,                           // First
+      caseItem.last_name,                            // Last
+      caseItem.home_phone || '',                     // Home Phone
+      caseItem.cell_phone || '',                     // Cell Phone
+      caseItem.firstNote || '',                      // Notas (first note)
+      caseItem.channel,                              // Canal
+      'TRUE'                                         // Preview
+    ])
 
     const csvContent = [
       csvHeaders.join(','),
-      ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...csvRows.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(','))
     ].join('\n')
 
     // Return CSV as downloadable file
@@ -102,7 +74,7 @@ export async function POST(request: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename="cases-export-${new Date().toISOString().split('T')[0]}.csv"`
+        'Content-Disposition': `attachment; filename="appointments-export-${new Date().toISOString().split('T')[0]}.csv"`
       }
     })
 
@@ -113,10 +85,16 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})
+
+// POST endpoint for backward compatibility
+export const POST = withApiKeyAuth(async (request: NextRequest) => {
+  // Redirect to GET for consistency
+  return GET(request)
+})
 
 // GET endpoint for testing with mock data
-export async function GET() {
+export async function GET_mock() {
   try {
     const mockCases = [
       {

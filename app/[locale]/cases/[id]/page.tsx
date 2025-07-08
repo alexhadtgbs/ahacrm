@@ -5,72 +5,65 @@ import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { formatDate, getCurrentLocale } from '@/lib/utils'
+import { fetchCases, updateCase, createNote, fetchNotes } from '@/lib/api'
+import { useAuth } from '@/hooks/useAuth'
 import type { Case, CaseWithNotes, Note } from '@/types'
-
-// Mock data for development
-const mockCase: CaseWithNotes = {
-  id: 1,
-  created_at: '2024-01-15T10:30:00Z',
-  assigned_to: 'user1',
-  first_name: 'Mario',
-  last_name: 'Rossi',
-  phone: '+39 123 456 7890',
-  email: 'mario.rossi@email.com',
-  channel: 'WEB',
-  origin: 'Website Contact Form',
-  status: 'IN_CORSO',
-  outcome: 'Interested in LASIK',
-  clinic: 'Centro Oculistico Milano',
-  treatment: 'LASIK Surgery',
-  promotion: 'Spring Special',
-  follow_up_date: '2024-01-20T14:00:00Z',
-  dialer_campaign_tag: 'Q1-Follow-Up',
-  notes: [
-    {
-      id: 1,
-      created_at: '2024-01-15T11:00:00Z',
-      case_id: 1,
-      user_id: 'user1',
-      content: 'Initial contact made. Patient interested in LASIK surgery. Scheduled follow-up call.'
-    },
-    {
-      id: 2,
-      created_at: '2024-01-16T14:30:00Z',
-      case_id: 1,
-      user_id: 'user1',
-      content: 'Follow-up call completed. Patient has questions about recovery time and costs.'
-    }
-  ]
-}
 
 export default function CaseDetailPage() {
   const [caseData, setCaseData] = useState<CaseWithNotes | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [newNote, setNewNote] = useState('')
+  const [addingNote, setAddingNote] = useState(false)
   const [editing, setEditing] = useState(false)
   const router = useRouter()
   const params = useParams()
-  const caseId = params.id as string
+  const { user } = useAuth()
+  const caseId = parseInt(params.id as string)
 
   useEffect(() => {
-    // Simulate loading case data
-    setTimeout(() => {
-      setCaseData(mockCase)
-      setLoading(false)
-    }, 500)
+    if (caseId) {
+      loadCaseData()
+    }
   }, [caseId])
+
+  const loadCaseData = async () => {
+    try {
+      setLoading(true)
+      // Fetch case data
+      const cases = await fetchCases()
+      const caseItem = cases.find(c => c.id === caseId)
+      
+      if (!caseItem) {
+        setCaseData(null)
+        return
+      }
+
+      // Fetch notes for this case
+      const notes = await fetchNotes(caseId)
+      
+      setCaseData({
+        ...caseItem,
+        notes: notes
+      })
+    } catch (error) {
+      console.error('Error loading case data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSave = async () => {
     if (!caseData) return
     
     setSaving(true)
     try {
-      // TODO: Implement save logic
-      console.log('Saving case:', caseData)
+      await updateCase(caseData.id, caseData)
       setEditing(false)
+      await loadCaseData() // Refresh data
     } catch (error) {
       console.error('Error saving case:', error)
+      alert('Failed to save case')
     } finally {
       setSaving(false)
     }
@@ -79,19 +72,20 @@ export default function CaseDetailPage() {
   const handleAddNote = async () => {
     if (!newNote.trim() || !caseData) return
 
-    const note: Note = {
-      id: Date.now(),
-      created_at: new Date().toISOString(),
-      case_id: caseData.id,
-      user_id: 'user1', // TODO: Get from auth
-      content: newNote
+    setAddingNote(true)
+    try {
+      const note = await createNote(caseData.id, newNote)
+      setCaseData({
+        ...caseData,
+        notes: [note, ...caseData.notes]
+      })
+      setNewNote('')
+    } catch (error) {
+      console.error('Error adding note:', error)
+      alert('Failed to add note')
+    } finally {
+      setAddingNote(false)
     }
-
-    setCaseData({
-      ...caseData,
-      notes: [note, ...caseData.notes]
-    })
-    setNewNote('')
   }
 
   const handleStatusChange = (newStatus: string) => {
@@ -199,6 +193,18 @@ export default function CaseDetailPage() {
                   disabled={!editing}
                 />
                 <Input
+                  label="Home Phone"
+                  value={caseData.home_phone}
+                  onChange={(e) => setCaseData({ ...caseData, home_phone: e.target.value })}
+                  disabled={!editing}
+                />
+                <Input
+                  label="Cell Phone"
+                  value={caseData.cell_phone}
+                  onChange={(e) => setCaseData({ ...caseData, cell_phone: e.target.value })}
+                  disabled={!editing}
+                />
+                <Input
                   label="Email"
                   type="email"
                   value={caseData.email || ''}
@@ -229,6 +235,13 @@ export default function CaseDetailPage() {
                   onChange={(e) => setCaseData({ ...caseData, promotion: e.target.value })}
                   disabled={!editing}
                 />
+                <Input
+                  label="Disposition"
+                  value={caseData.disposition || ''}
+                  onChange={(e) => setCaseData({ ...caseData, disposition: e.target.value })}
+                  disabled={!editing}
+                  placeholder="e.g., Interested in consultation, Not interested, etc."
+                />
               </div>
             </div>
 
@@ -243,9 +256,14 @@ export default function CaseDetailPage() {
                   placeholder="Add a new note..."
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
+                  disabled={addingNote}
                 />
                 <div className="mt-2 flex justify-end">
-                  <Button onClick={handleAddNote} disabled={!newNote.trim()}>
+                  <Button 
+                    onClick={handleAddNote} 
+                    disabled={!newNote.trim() || addingNote}
+                    loading={addingNote}
+                  >
                     Add Note
                   </Button>
                 </div>
@@ -256,13 +274,25 @@ export default function CaseDetailPage() {
                 {caseData.notes.map((note) => (
                   <div key={note.id} className="border-l-4 border-primary pl-4 py-2">
                     <div className="flex justify-between items-start">
-                      <p className="text-text-primary">{note.content}</p>
-                      <span className="text-sm text-text-secondary">
+                      <div className="flex-1">
+                        <p className="text-text-primary">{note.content}</p>
+                        {note.profiles && (
+                          <p className="text-sm text-text-secondary mt-1">
+                            By {note.profiles.full_name}
+                          </p>
+                        )}
+                      </div>
+                      <span className="text-sm text-text-secondary ml-4">
                         {formatDate(note.created_at)}
                       </span>
                     </div>
                   </div>
                 ))}
+                {caseData.notes.length === 0 && (
+                  <p className="text-text-secondary text-center py-4">
+                    No notes yet. Add the first note above.
+                  </p>
+                )}
               </div>
             </div>
           </div>

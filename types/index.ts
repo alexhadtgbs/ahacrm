@@ -11,11 +11,14 @@ export interface Case {
   assigned_to?: string;
   first_name: string;
   last_name: string;
-  phone: string;
+  phone?: string;
+  home_phone?: string;
+  cell_phone?: string;
   email?: string;
   channel: 'WEB' | 'FACEBOOK' | 'INFLUENCER';
   origin: string;
   status: 'IN_CORSO' | 'CHIUSO' | 'APPUNTAMENTO';
+  disposition?: string;
   outcome?: string;
   clinic: string;
   treatment?: string;
@@ -30,6 +33,7 @@ export interface Note {
   case_id: number;
   user_id: string;
   content: string;
+  profiles?: Profile;
 }
 
 export interface CaseWithNotes extends Case {
@@ -40,11 +44,14 @@ export interface CaseWithNotes extends Case {
 export interface CaseFormData {
   first_name: string;
   last_name: string;
-  phone: string;
+  phone?: string;
+  home_phone?: string;
+  cell_phone?: string;
   email?: string;
   channel: 'WEB' | 'FACEBOOK' | 'INFLUENCER';
   origin: string;
   status: 'IN_CORSO' | 'CHIUSO' | 'APPUNTAMENTO';
+  disposition?: string;
   outcome?: string;
   clinic: string;
   treatment?: string;
