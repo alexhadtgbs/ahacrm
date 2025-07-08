@@ -13,9 +13,11 @@ A modern, web-based lead management platform designed specifically for ophthalmo
 - **Status Tracking**: Monitor case progress from initial contact to appointment
 
 ### CCaaS Integration
+- **Phone Lookup API**: Dedicated endpoint for screen pop functionality (`/api/lookup`)
 - **Dialer Integration**: Secure API endpoint for outbound dialer systems
 - **Screen Pop Functionality**: Automatic case record opening via URL
 - **Campaign Management**: Tag-based lead organization for dialer campaigns
+- **Multi-Platform Support**: Ready for Genesys Cloud, Amazon Connect, Twilio Flex, Five9, and more
 
 ### Data Management
 - **CSV Export**: Export filtered case lists for external analysis
@@ -195,9 +197,11 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 6. **Export Data**: Use the export button to download filtered cases as CSV
 
 ### CCaaS Integration
+- **Phone Lookup API**: `GET /api/lookup?phone=+391234567890` or `POST /api/lookup` with phone in body
 - **Dialer API**: `POST /api/dialer` with `{ "campaign_tag_filter": "Q1-Follow-Up" }`
 - **Screen Pop**: Navigate to `/it/cases/{caseId}` to open specific case records
 - **Lead Fetching**: The dialer can fetch leads via the API endpoint
+- **API Documentation**: Visit `/api/docs` for interactive Swagger documentation
 
 ## 🌐 Internationalization
 

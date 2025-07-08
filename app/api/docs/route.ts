@@ -366,6 +366,306 @@ export async function GET() {
           }
         }
       },
+      '/lookup': {
+        get: {
+          summary: 'Lookup case by phone number for CCaaS screen pop',
+          description: 'Search for a case using a phone number. Returns case ID and essential data optimized for CCaaS screen pop functionality. Searches across all phone fields (phone, home_phone, cell_phone).',
+          security: [
+            { ApiKeyAuth: [] },
+            { BearerAuth: [] }
+          ],
+          parameters: [
+            {
+              name: 'phone',
+              in: 'query',
+              required: true,
+              description: 'Phone number to search for (e.g., +391234567890)',
+              schema: {
+                type: 'string',
+                example: '+391234567890'
+              }
+            }
+          ],
+          responses: {
+            '200': {
+              description: 'Case found successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      found: {
+                        type: 'boolean',
+                        example: true
+                      },
+                      case_id: {
+                        type: 'string',
+                        format: 'uuid',
+                        description: 'The case ID for screen pop'
+                      },
+                      patient: {
+                        type: 'object',
+                        properties: {
+                          name: {
+                            type: 'string',
+                            example: 'Mario Rossi'
+                          },
+                          phone: {
+                            type: 'string',
+                            example: '+391234567890'
+                          },
+                          home_phone: {
+                            type: 'string',
+                            example: '+391234567891'
+                          },
+                          cell_phone: {
+                            type: 'string',
+                            example: '+391234567892'
+                          },
+                          email: {
+                            type: 'string',
+                            example: 'mario.rossi@email.com'
+                          }
+                        }
+                      },
+                      case: {
+                        type: 'object',
+                        properties: {
+                          status: {
+                            type: 'string',
+                            example: 'APPUNTAMENTO'
+                          },
+                          clinic: {
+                            type: 'string',
+                            example: 'Clinica Oculistica Roma'
+                          },
+                          treatment: {
+                            type: 'string',
+                            example: 'Cataratta'
+                          },
+                          disposition: {
+                            type: 'string',
+                            example: 'Interessato'
+                          },
+                          outcome: {
+                            type: 'string',
+                            example: 'Paziente conferma appuntamento'
+                          },
+                          created_at: {
+                            type: 'string',
+                            format: 'date-time'
+                          },
+                          follow_up_date: {
+                            type: 'string',
+                            format: 'date-time'
+                          }
+                        }
+                      },
+                      screen_pop_url: {
+                        type: 'string',
+                        description: 'Direct URL to open the case in the CRM',
+                        example: 'https://crm-gules-six.vercel.app/it/cases/123e4567-e89b-12d3-a456-426614174000'
+                      },
+                      phone_searched: {
+                        type: 'string',
+                        example: '+391234567890'
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            '400': {
+              description: 'Bad request - Missing phone number',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        example: 'Phone number is required'
+                      },
+                      message: {
+                        type: 'string',
+                        example: 'Please provide a phone number in the query parameter: ?phone=+391234567890'
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            '404': {
+              description: 'No case found for the phone number',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      found: {
+                        type: 'boolean',
+                        example: false
+                      },
+                      message: {
+                        type: 'string',
+                        example: 'No case found for phone number: +391234567890'
+                      },
+                      phone: {
+                        type: 'string',
+                        example: '+391234567890'
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            '401': {
+              description: 'Unauthorized - Invalid or missing API key',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        example: 'Unauthorized'
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string'
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        post: {
+          summary: 'Lookup case by phone number (POST method)',
+          description: 'Alternative POST method for phone lookup. Send phone number in request body instead of query parameter.',
+          security: [
+            { ApiKeyAuth: [] },
+            { BearerAuth: [] }
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['phone'],
+                  properties: {
+                    phone: {
+                      type: 'string',
+                      description: 'Phone number to search for',
+                      example: '+391234567890'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            '200': {
+              description: 'Case found successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/LookupResponse'
+                  }
+                }
+              }
+            },
+            '400': {
+              description: 'Bad request - Missing phone number',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        example: 'Phone number is required in request body'
+                      },
+                      message: {
+                        type: 'string',
+                        example: 'Please provide a phone number in the request body: {"phone": "+391234567890"}'
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            '404': {
+              description: 'No case found for the phone number',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      found: {
+                        type: 'boolean',
+                        example: false
+                      },
+                      message: {
+                        type: 'string',
+                        example: 'No case found for phone number: +391234567890'
+                      },
+                      phone: {
+                        type: 'string',
+                        example: '+391234567890'
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            '401': {
+              description: 'Unauthorized - Invalid or missing API key',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string',
+                        example: 'Unauthorized'
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            '500': {
+              description: 'Internal server error',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      error: {
+                        type: 'string'
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       '/cases': {
         get: {
           summary: 'Get all cases',
@@ -960,6 +1260,89 @@ export async function GET() {
             }
           },
           required: ['id', 'created_at', 'first_name', 'last_name', 'phone', 'channel', 'origin', 'clinic']
+        },
+        LookupResponse: {
+          type: 'object',
+          properties: {
+            found: {
+              type: 'boolean',
+              description: 'Whether a case was found for the phone number'
+            },
+            case_id: {
+              type: 'string',
+              format: 'uuid',
+              description: 'The case ID for screen pop'
+            },
+            patient: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  description: 'Full patient name'
+                },
+                phone: {
+                  type: 'string',
+                  description: 'Primary phone number'
+                },
+                home_phone: {
+                  type: 'string',
+                  description: 'Home phone number'
+                },
+                cell_phone: {
+                  type: 'string',
+                  description: 'Cell phone number'
+                },
+                email: {
+                  type: 'string',
+                  description: 'Patient email address'
+                }
+              }
+            },
+            case: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                  description: 'Current case status'
+                },
+                clinic: {
+                  type: 'string',
+                  description: 'Clinic name'
+                },
+                treatment: {
+                  type: 'string',
+                  description: 'Treatment type'
+                },
+                disposition: {
+                  type: 'string',
+                  description: 'Patient disposition'
+                },
+                outcome: {
+                  type: 'string',
+                  description: 'Current outcome'
+                },
+                created_at: {
+                  type: 'string',
+                  format: 'date-time',
+                  description: 'Case creation date'
+                },
+                follow_up_date: {
+                  type: 'string',
+                  format: 'date-time',
+                  description: 'Follow-up appointment date'
+                }
+              }
+            },
+            screen_pop_url: {
+              type: 'string',
+              description: 'Direct URL to open the case in the CRM'
+            },
+            phone_searched: {
+              type: 'string',
+              description: 'The phone number that was searched'
+            }
+          },
+          required: ['found', 'phone_searched']
         }
       }
     }
