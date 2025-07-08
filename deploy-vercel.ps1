@@ -97,7 +97,7 @@ Write-Host "     - NEXT_PUBLIC_SUPABASE_URL" -ForegroundColor Gray
 Write-Host "     - NEXT_PUBLIC_SUPABASE_ANON_KEY" -ForegroundColor Gray
 Write-Host "     - SUPABASE_SERVICE_ROLE_KEY" -ForegroundColor Gray
 Write-Host "     - API_KEY_SECRET" -ForegroundColor Gray
-Write-Host "   • Click 'Deploy'" -ForegroundColor White
+Write-Host "   - Click 'Deploy'" -ForegroundColor White
 
 Write-Host "`n2️⃣ Vercel CLI:" -ForegroundColor Cyan
 Write-Host "   • Run: vercel login" -ForegroundColor White
