@@ -20,15 +20,13 @@ export const GET = withApiKeyAuth(async (request: Request) => {
     const cookieStore = cookies()
     const supabase = createClient(cookieStore)
     
-    // Generate phone number variations for flexible matching
-    const phoneVariations = generatePhoneVariations(phone)
+    // Strict normalization: remove all non-digit characters except leading +
+    const normalize = (phone: string) => phone ? phone.replace(/[^\d+]/g, '') : '';
+    const normalizedInput = normalize(phone);
+    // Use last 7 digits for broad DB filter
+    const last7 = normalizedInput.replace(/\D/g, '').slice(-7);
 
-    // Build the OR condition for all phone variations across all phone fields
-    const phoneConditions = phoneVariations.map(variation =>
-      `phone.eq.${variation},home_phone.eq.${variation},cell_phone.eq.${variation}`
-    ).join(',')
-
-    // Search for cases with any matching phone variation
+    // Query for any case where any phone field contains the last 7 digits
     const { data: cases, error } = await supabase
       .from('cases')
       .select(`
@@ -47,7 +45,11 @@ export const GET = withApiKeyAuth(async (request: Request) => {
         created_at,
         follow_up_date
       `)
-      .or(phoneConditions)
+      .or([
+        `phone.ilike.%${last7}`,
+        `home_phone.ilike.%${last7}`,
+        `cell_phone.ilike.%${last7}`
+      ].join(','))
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -55,12 +57,10 @@ export const GET = withApiKeyAuth(async (request: Request) => {
       return NextResponse.json({ error: 'Failed to lookup case' }, { status: 500 })
     }
 
-    // Final in-memory normalization check (in case DB formatting is inconsistent)
+    // In-memory strict normalized match
     const foundCase = (cases || []).find(c =>
-      phoneVariations.some(variation =>
-        [c.phone, c.home_phone, c.cell_phone].some(dbPhone =>
-          dbPhone && generatePhoneVariations(dbPhone).includes(variation)
-        )
+      [c.phone, c.home_phone, c.cell_phone].some(dbPhone =>
+        dbPhone && normalize(dbPhone) === normalizedInput
       )
     )
 
@@ -118,15 +118,13 @@ export const POST = withApiKeyAuth(async (request: Request) => {
     const cookieStore = cookies()
     const supabase = createClient(cookieStore)
     
-    // Generate phone number variations for flexible matching
-    const phoneVariations = generatePhoneVariations(phone)
+    // Strict normalization: remove all non-digit characters except leading +
+    const normalize = (phone: string) => phone ? phone.replace(/[^\d+]/g, '') : '';
+    const normalizedInput = normalize(phone);
+    // Use last 7 digits for broad DB filter
+    const last7 = normalizedInput.replace(/\D/g, '').slice(-7);
 
-    // Build the OR condition for all phone variations across all phone fields
-    const phoneConditions = phoneVariations.map(variation =>
-      `phone.eq.${variation},home_phone.eq.${variation},cell_phone.eq.${variation}`
-    ).join(',')
-
-    // Search for cases with any matching phone variation
+    // Query for any case where any phone field contains the last 7 digits
     const { data: cases, error } = await supabase
       .from('cases')
       .select(`
@@ -145,7 +143,11 @@ export const POST = withApiKeyAuth(async (request: Request) => {
         created_at,
         follow_up_date
       `)
-      .or(phoneConditions)
+      .or([
+        `phone.ilike.%${last7}`,
+        `home_phone.ilike.%${last7}`,
+        `cell_phone.ilike.%${last7}`
+      ].join(','))
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -153,12 +155,10 @@ export const POST = withApiKeyAuth(async (request: Request) => {
       return NextResponse.json({ error: 'Failed to lookup case' }, { status: 500 })
     }
 
-    // Final in-memory normalization check (in case DB formatting is inconsistent)
+    // In-memory strict normalized match
     const foundCase = (cases || []).find(c =>
-      phoneVariations.some(variation =>
-        [c.phone, c.home_phone, c.cell_phone].some(dbPhone =>
-          dbPhone && generatePhoneVariations(dbPhone).includes(variation)
-        )
+      [c.phone, c.home_phone, c.cell_phone].some(dbPhone =>
+        dbPhone && normalize(dbPhone) === normalizedInput
       )
     )
 
