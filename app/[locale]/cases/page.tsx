@@ -9,6 +9,7 @@ import { formatDate, getCurrentLocale } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchCases, updateCaseStatus, createCase } from '@/lib/api'
 import type { Case, CaseFilters, CaseFormData } from '@/types'
+import { X, FileText, Key, Download, Plus } from 'lucide-react'
 
 export default function CasesPage() {
   const [cases, setCases] = useState<Case[]>([])
@@ -239,7 +240,7 @@ export default function CasesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dark:bg-background">
       {/* Header */}
       <Header />
       
@@ -247,23 +248,27 @@ export default function CasesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-h1 text-text-primary">Cases</h1>
-            <p className="text-text-secondary">Manage patient leads and inquiries</p>
+            <h1 className="text-h1 text-foreground dark:text-foreground">Cases</h1>
+            <p className="text-text-secondary dark:text-foreground">Manage patient leads and inquiries</p>
           </div>
           <div className="flex space-x-3">
             <Button variant="outline" onClick={() => window.open('/api-docs', '_blank')}>
+              <FileText className="h-4 w-4 mr-2" />
               API Docs
             </Button>
             <Button variant="outline" onClick={() => {
               const locale = getCurrentLocale()
               router.push(`/${locale}/api-keys`)
             }}>
+              <Key className="h-4 w-4 mr-2" />
               API Keys
             </Button>
             <Button variant="outline" onClick={handleExport}>
+              <Download className="h-4 w-4 mr-2" />
               Export Appointments
             </Button>
             <Button onClick={() => setShowCreateModal(true)}>
+              <Plus className="h-4 w-4 mr-2" />
               New Case
             </Button>
           </div>
@@ -272,18 +277,18 @@ export default function CasesPage() {
         {/* Create Case Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-card rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-text-primary">Create New Case</h2>
+                <h2 className="text-2xl font-bold text-foreground">Create New Case</h2>
                 <Button variant="outline" onClick={() => setShowCreateModal(false)}>
-                  ✕
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
               
               <form onSubmit={handleCreateCase} className="space-y-6">
                 {/* Patient Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <h3 className="text-lg font-semibold text-text-primary md:col-span-2">Patient Information</h3>
+                  <h3 className="text-lg font-semibold text-foreground md:col-span-2">Patient Information</h3>
                   
                   <Input
                     label="First Name *"
@@ -328,10 +333,10 @@ export default function CasesPage() {
 
                 {/* Case Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <h3 className="text-lg font-semibold text-text-primary md:col-span-2">Case Details</h3>
+                  <h3 className="text-lg font-semibold text-foreground md:col-span-2">Case Details</h3>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Channel *
                     </label>
                     <select
@@ -412,7 +417,7 @@ export default function CasesPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-white border-b border-gray-200">
+                    <div className="bg-card border-b border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Input
@@ -451,50 +456,50 @@ export default function CasesPage() {
 
         {/* Cases Table */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+          <div className="bg-card shadow-sm rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Patient
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Contact
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Channel
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Clinic
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Created
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-card divide-y divide-border">
                   {filteredCases.map((caseItem) => (
-                    <tr key={caseItem.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleCaseClick(caseItem.id)}>
+                    <tr key={caseItem.id} className="hover:bg-accent cursor-pointer" onClick={() => handleCaseClick(caseItem.id)}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-foreground">
                           {caseItem.first_name} {caseItem.last_name}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{caseItem.phone}</div>
+                        <div className="text-sm text-foreground">{caseItem.phone}</div>
                         {caseItem.email && (
-                          <div className="text-sm text-gray-500">{caseItem.email}</div>
+                          <div className="text-sm text-muted-foreground">{caseItem.email}</div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary">
                           {caseItem.channel}
                         </span>
                       </td>
@@ -513,10 +518,10 @@ export default function CasesPage() {
                           <option value="CHIUSO">Closed</option>
                         </select>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         {caseItem.clinic}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                         {formatDate(caseItem.created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -535,7 +540,7 @@ export default function CasesPage() {
             
             {filteredCases.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500">No cases found. Try adjusting your filters or create a new case.</p>
+                <p className="text-muted-foreground">No cases found. Try adjusting your filters or create a new case.</p>
               </div>
             )}
           </div>

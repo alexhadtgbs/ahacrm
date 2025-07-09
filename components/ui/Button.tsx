@@ -20,10 +20,33 @@ export function Button({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
   
   const variants = {
-    primary: 'bg-primary hover:bg-primary-dark text-white focus:ring-primary',
-    secondary: 'bg-gray-200 hover:bg-gray-300 text-text-primary focus:ring-gray-500',
-    danger: 'bg-alert-error hover:bg-red-700 text-white focus:ring-red-500',
-    outline: 'border border-gray-300 bg-white hover:bg-gray-50 text-text-primary focus:ring-primary'
+    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary',
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 focus:ring-secondary',
+    danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive',
+    outline: 'border border-border bg-background hover:bg-accent hover:text-accent-foreground text-foreground focus:ring-ring'
+  }
+  
+  const getButtonStyle = (variant: string) => {
+    if (variant === 'primary') {
+      return {
+        backgroundColor: 'var(--primary)',
+        color: 'var(--primary-foreground)'
+      }
+    }
+    if (variant === 'secondary') {
+      return {
+        backgroundColor: 'var(--secondary)',
+        color: 'var(--secondary-foreground)'
+      }
+    }
+    if (variant === 'danger') {
+      return {
+        backgroundColor: 'var(--destructive)',
+        color: 'var(--destructive-foreground)'
+      }
+    }
+    // Don't apply inline styles for outline variant - let CSS handle it
+    return {}
   }
   
   const sizes = {
@@ -40,6 +63,7 @@ export function Button({
         sizes[size],
         className
       )}
+      style={getButtonStyle(variant)}
       disabled={disabled || loading}
       {...props}
     >

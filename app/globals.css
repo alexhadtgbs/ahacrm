@@ -2,6 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme variables for light and dark mode (shadcn/ui convention) */
+/* WCAG 2.1 AA compliant contrast ratios */
+:root {
+  --background: #F8F9FA;
+  --foreground: #1a1a2e; /* Darker for better contrast */
+  --primary: #004B93;
+  --primary-foreground: #ffffff; /* Pure white for maximum contrast */
+  --secondary: #008080;
+  --secondary-foreground: #ffffff; /* Pure white for maximum contrast */
+  --surface: #ffffff;
+  --surface-foreground: #1a1a2e;
+  --card: #ffffff;
+  --card-foreground: #1a1a2e;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a2e;
+  --border: #d1d5db;
+  --input: #d1d5db;
+  --ring: #004B93;
+  --radius: 0.625rem;
+  --destructive: #dc2626; /* Slightly darker red for better contrast */
+  --destructive-foreground: #ffffff;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #1a1a2e;
+}
+
+.dark {
+  --background: #1a1a2e;
+  --foreground: #f8fafc; /* Lighter for better contrast */
+  --primary: #004B93;
+  --primary-foreground: #ffffff;
+  --secondary: #008080;
+  --secondary-foreground: #ffffff;
+  --surface: #2a2a40;
+  --surface-foreground: #f8fafc;
+  --card: #2a2a40;
+  --card-foreground: #f8fafc;
+  --popover: #2a2a40;
+  --popover-foreground: #f8fafc;
+  --border: #475569;
+  --input: #475569;
+  --ring: #004B93;
+  --destructive: #ef4444; /* Brighter red for dark mode */
+  --destructive-foreground: #ffffff;
+  --muted: #334155;
+  --muted-foreground: #cbd5e1;
+  --accent: #334155;
+  --accent-foreground: #f8fafc;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito+Sans:wght@300;400;600;700&display=swap');
 
 @layer base {
@@ -10,36 +61,107 @@
   }
   
   body {
-    @apply bg-background text-text-primary;
+    background: var(--background);
+    color: var(--foreground);
   }
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  /* Button styles to ensure proper text colors */
+  .bg-primary {
+    background-color: var(--primary) !important;
   }
   
-  .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-text-primary font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  .text-primary-foreground {
+    color: var(--primary-foreground) !important;
   }
   
-  .btn-danger {
-    @apply bg-alert-error hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+  /* Force white text on primary buttons */
+  .bg-primary.text-primary-foreground {
+    color: #ffffff !important;
+  }
+  
+  /* Additional specificity for button text */
+  button.bg-primary,
+  .bg-primary button,
+  .bg-primary.text-primary-foreground {
+    color: #ffffff !important;
+  }
+  
+  .bg-secondary {
+    background-color: var(--secondary) !important;
+  }
+  
+  .text-secondary-foreground {
+    color: var(--secondary-foreground) !important;
+  }
+  
+  .bg-destructive {
+    background-color: var(--destructive) !important;
+  }
+  
+  .text-destructive-foreground {
+    color: var(--destructive-foreground) !important;
+  }
+  
+  /* Outline button styles for proper contrast */
+  .border-border.bg-background.text-foreground {
+    background-color: transparent !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+  }
+  
+  /* Outline button on primary background (header) */
+  .bg-primary .border-border.bg-background.text-foreground {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+  
+  /* Outline button when header has primary background */
+  header.bg-primary .border-border.bg-background.text-foreground {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+  
+  /* Direct outline button styling for header context */
+  .bg-primary .border-border.bg-background.text-foreground,
+  header .border-border.bg-background.text-foreground {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+  
+  /* Specific styling for header buttons */
+  .header-button {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+    background: var(--surface);
+    color: var(--foreground);
+    border: 1px solid var(--input);
+    @apply w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
   }
   
   .card {
-    @apply bg-surface rounded-lg shadow-sm border border-gray-200 p-6;
+    background: var(--card);
+    color: var(--card-foreground);
+    border: 1px solid var(--border);
+    @apply rounded-lg shadow-sm p-6;
   }
   
   .table-header {
-    @apply bg-gray-50 text-left text-label font-medium text-text-secondary uppercase tracking-wider;
+    background: var(--surface);
+    color: var(--foreground);
+    @apply text-left font-medium uppercase tracking-wider;
   }
   
   .table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-body;
+    color: var(--foreground);
+    @apply px-6 py-4 whitespace-nowrap;
   }
 } 

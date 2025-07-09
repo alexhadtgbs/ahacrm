@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input'
 import { Header } from '@/components/ui/Header'
 import { getCurrentLocale } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
+import { AlertTriangle, FileText, ArrowLeft, Plus, Copy, RotateCcw, Trash2 } from 'lucide-react'
 
 interface ApiKey {
   id: string
@@ -196,18 +197,17 @@ export default function ApiKeysPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background dark:bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-          <p className="mt-2 text-gray-500">User: {user ? user.email : 'Not authenticated'}</p>
+          <p className="mt-2 text-foreground dark:text-foreground">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dark:bg-background">
       {/* Header */}
       <Header />
       
@@ -215,20 +215,23 @@ export default function ApiKeysPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-h1 text-text-primary">API Keys</h1>
-            <p className="text-text-secondary">Manage API keys for external integrations</p>
+            <h1 className="text-h1 text-foreground dark:text-foreground">API Keys</h1>
+            <p className="text-foreground dark:text-foreground">Manage API keys for external integrations</p>
           </div>
           <div className="flex space-x-3">
             <Button variant="outline" onClick={() => window.open('/api-docs', '_blank')}>
+              <FileText className="h-4 w-4 mr-2" />
               API Docs
             </Button>
             <Button variant="outline" onClick={() => {
               const locale = getCurrentLocale()
               router.push(`/${locale}/cases`)
             }}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Cases
             </Button>
             <Button onClick={() => setShowCreateForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
               Create API Key
             </Button>
           </div>
@@ -245,11 +248,13 @@ export default function ApiKeysPage() {
                   {newKey.key}
                 </code>
               </div>
-              <p className="text-sm text-red-600 mb-4">
-                ⚠️ This is the only time you'll see this key. Please save it securely!
+              <p className="text-sm text-red-600 mb-4 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                This is the only time you'll see this key. Please save it securely!
               </p>
               <div className="flex space-x-2">
                 <Button onClick={() => copyToClipboard(newKey.key)}>
+                  <Copy className="h-4 w-4 mr-2" />
                   Copy Key
                 </Button>
                 <Button variant="outline" onClick={() => setNewKey(null)}>
@@ -322,6 +327,7 @@ export default function ApiKeysPage() {
 
                 <div className="flex space-x-2 pt-4">
                   <Button type="submit" loading={creating}>
+                    <Plus className="h-4 w-4 mr-2" />
                     Generate Key
                   </Button>
                   <Button 
@@ -348,6 +354,7 @@ export default function ApiKeysPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">No API keys found</h3>
             <p className="text-gray-600 mb-4">Generate your first API key to get started</p>
             <Button onClick={() => setShowCreateForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
               Generate API Key
             </Button>
           </div>
@@ -417,6 +424,7 @@ export default function ApiKeysPage() {
                       size="sm"
                       onClick={() => setShowCreateForm(true)}
                     >
+                      <RotateCcw className="h-4 w-4 mr-2" />
                       Regenerate
                     </Button>
                     <Button
@@ -425,6 +433,7 @@ export default function ApiKeysPage() {
                       loading={deleting === apiKey.id}
                       onClick={() => handleDeleteApiKey(apiKey.id)}
                     >
+                      <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </Button>
                   </div>

@@ -99,10 +99,10 @@ export default function CaseDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background dark:bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-text-secondary">Loading case...</p>
+          <p className="mt-4 text-foreground dark:text-foreground">Loading case...</p>
         </div>
       </div>
     )
@@ -110,10 +110,10 @@ export default function CaseDetailPage() {
 
   if (!caseData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background dark:bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-h2 text-text-primary">Case not found</h2>
-          <p className="text-text-secondary">The case you're looking for doesn't exist.</p>
+          <h2 className="text-h2 text-foreground dark:text-foreground">Case not found</h2>
+          <p className="text-foreground dark:text-foreground">The case you're looking for doesn't exist.</p>
           <Button onClick={() => {
             const locale = getCurrentLocale()
             router.push(`/${locale}/cases`)
@@ -126,7 +126,7 @@ export default function CaseDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dark:bg-background">
       {/* Header */}
       <Header />
       
@@ -141,10 +141,10 @@ export default function CaseDetailPage() {
               ← Back to Cases
             </Button>
             <div>
-              <h1 className="text-h1 text-text-primary">
+              <h1 className="text-h1 text-foreground dark:text-foreground">
                 Case #{caseData.id} - {caseData.first_name} {caseData.last_name}
               </h1>
-              <p className="text-text-secondary">Created {formatDate(caseData.created_at)}</p>
+              <p className="text-foreground dark:text-foreground">Created {formatDate(caseData.created_at)}</p>
             </div>
           </div>
           <div className="flex space-x-3">
