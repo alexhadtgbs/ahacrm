@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { Header } from '@/components/ui/Header'
 import { formatDate, getCurrentLocale } from '@/lib/utils'
 import { fetchCases, updateCase, createNote, fetchNotes } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
@@ -127,47 +128,46 @@ export default function CaseDetailPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" onClick={() => {
-                const locale = getCurrentLocale()
-                router.push(`/${locale}/cases`)
-              }}>
-                ← Back to Cases
-              </Button>
-              <div>
-                <h1 className="text-h1 text-text-primary">
-                  Case #{caseData.id} - {caseData.first_name} {caseData.last_name}
-                </h1>
-                <p className="text-text-secondary">Created {formatDate(caseData.created_at)}</p>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <Button variant="outline" onClick={() => window.open('/api-docs', '_blank')}>
-                API Docs
-              </Button>
-              {editing ? (
-                <>
-                  <Button variant="outline" onClick={() => setEditing(false)}>
-                    Cancel
-                  </Button>
-                  <Button loading={saving} onClick={handleSave}>
-                    Save Changes
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={() => setEditing(true)}>
-                  Edit Case
-                </Button>
-              )}
+      <Header />
+      
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" onClick={() => {
+              const locale = getCurrentLocale()
+              router.push(`/${locale}/cases`)
+            }}>
+              ← Back to Cases
+            </Button>
+            <div>
+              <h1 className="text-h1 text-text-primary">
+                Case #{caseData.id} - {caseData.first_name} {caseData.last_name}
+              </h1>
+              <p className="text-text-secondary">Created {formatDate(caseData.created_at)}</p>
             </div>
           </div>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => window.open('/api-docs', '_blank')}>
+              API Docs
+            </Button>
+            {editing ? (
+              <>
+                <Button variant="outline" onClick={() => setEditing(false)}>
+                  Cancel
+                </Button>
+                <Button loading={saving} onClick={handleSave}>
+                  Save Changes
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => setEditing(true)}>
+                Edit Case
+              </Button>
+            )}
+          </div>
         </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Case Information */}
           <div className="lg:col-span-2 space-y-6">

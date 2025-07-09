@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { Header } from '@/components/ui/Header'
 import { getCurrentLocale } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -208,37 +209,31 @@ export default function ApiKeysPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-h1 text-text-primary">API Keys</h1>
-              <p className="text-text-secondary">Manage your API keys for programmatic access</p>
-              {user && (
-                <p className="text-sm text-text-secondary mt-1">
-                  Welcome, {user.email}
-                </p>
-              )}
-            </div>
-            <div className="flex space-x-3">
-              <Button variant="outline" onClick={() => window.open('/api-docs', '_blank')}>
-                API Docs
-              </Button>
-              <Button variant="outline" onClick={() => {
-                const locale = getCurrentLocale()
-                router.push(`/${locale}/cases`)
-              }}>
-                Back to Cases
-              </Button>
-              <Button onClick={() => setShowCreateForm(true)}>
-                Generate New Key
-              </Button>
-            </div>
+      <Header />
+      
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-h1 text-text-primary">API Keys</h1>
+            <p className="text-text-secondary">Manage API keys for external integrations</p>
+          </div>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => window.open('/api-docs', '_blank')}>
+              API Docs
+            </Button>
+            <Button variant="outline" onClick={() => {
+              const locale = getCurrentLocale()
+              router.push(`/${locale}/cases`)
+            }}>
+              Back to Cases
+            </Button>
+            <Button onClick={() => setShowCreateForm(true)}>
+              Create API Key
+            </Button>
           </div>
         </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* New API Key Modal */}
         {newKey && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
